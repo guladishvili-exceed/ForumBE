@@ -17,7 +17,7 @@ const Posts =db.define("Topics",{
 		type: Sequelize.STRING
 	},
 	comment : {
-		type:Sequelize.ARRAY(Sequelize.TEXT),
+		type:Sequelize.ARRAY(Sequelize.STRING),
 		defaultValue : [],
 		allowNull: false
 	}

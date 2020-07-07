@@ -10,6 +10,9 @@ const verify = require('./verifyToken')
 const app = express()
 const multer = require('multer')
 const path = require('path')
+let commentArrayNew = []
+
+
 
 app.engine('handlebars', exphbs({defaultLayout: "main"}))
 app.set('view engine', 'handlebars')
@@ -39,9 +42,9 @@ const upload = multer({
 // Check file type
 
 const checkFileType = (file,cb) => {
-		// Allowed extenstions
+	// Allowed extensions
 	const fileTypes = /jpeg|jpg|png|gif/;
-	//Check exntenstion
+	//Check extensions
 	const extname = fileTypes.test(	path.extname(file.originalname).toLowerCase())
 	//Check mimeType
 	const mimetype = fileTypes.test(file.mimetype)
@@ -203,22 +206,38 @@ app.put('/updateTopic/:id', (req, res) => {
 })
 
 // Add Comment
-app.put('/addComment/:id', (req, res) => {
-
-	let commentArray = []
+app.post('/addComment/:id', (req, res) => {
+	commentArrayNew.push(req.body.comment)
 	Posts.update({
-			comment: commentArray
+			comment: req.body.comment
 		},
 		{
 			where: {
 				id: req.params.id
 			}
 		}).then((post) => {
-		res.send(post)
+		res.status(200).json(post)
 	}).catch((err) => {
 		console.log("err", err);
 	});
 })
+
+//Get comments on post
+app.get('/getComment/:id',(req,res) => {
+	Posts.findAll({
+		where : {
+			id:req.params.id
+		},
+		attributes : ['id','comment']
+	})
+		.then(posts => {
+			res.send(posts)
+		})
+		.catch(err => {
+			console.log('--------err', err);
+		})
+})
+
 
 //Upload
 app.post('/upload',(req,res) => {
