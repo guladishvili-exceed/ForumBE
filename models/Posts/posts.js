@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize')
 const db = require('../../config/database')
+const Comment = require('../Comment/comment')
 
 const Posts =db.define("Topics",{
 	id: {
@@ -16,11 +17,11 @@ const Posts =db.define("Topics",{
 	username : {
 		type: Sequelize.STRING
 	},
-	comment : {
-		type:Sequelize.ARRAY(Sequelize.STRING),
-		defaultValue : [],
-		allowNull: false
-	}
 
 })
+
+Posts.association = (models) => {
+	Posts.hasMany(Comment);
+	Comment.belongsTo(Posts);
+}
 module.exports = Posts;

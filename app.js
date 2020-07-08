@@ -3,6 +3,7 @@ const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const Users = require('./models/Users/users')
 const Posts = require('./models/Posts/posts')
+const Comment = require('./models/Comment/comment')
 const cors = require('cors')
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
@@ -10,7 +11,7 @@ const verify = require('./verifyToken')
 const app = express()
 const multer = require('multer')
 const path = require('path')
-let commentArrayNew = []
+
 
 
 
@@ -207,28 +208,24 @@ app.put('/updateTopic/:id', (req, res) => {
 
 // Add Comment
 app.post('/addComment/:id', (req, res) => {
-	commentArrayNew.push(req.body.comment)
-	Posts.update({
-			comment: req.body.comment
-		},
-		{
-			where: {
-				id: req.params.id
-			}
-		}).then((post) => {
-		res.status(200).json(post)
-	}).catch((err) => {
-		console.log("err", err);
-	});
+	Comment.create({
+		comment : req.body.comment,
+		topicid: req.params.id
+	})
+		.then((result) => {
+			res.status(200).send(result)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
 })
 
-//Get comments on post
 app.get('/getComment/:id',(req,res) => {
-	Posts.findAll({
+	Comment.findAll({
 		where : {
-			id:req.params.id
+			topicid:req.params.id
 		},
-		attributes : ['id','comment']
+		attributes : ['comment']
 	})
 		.then(posts => {
 			res.send(posts)
@@ -238,6 +235,20 @@ app.get('/getComment/:id',(req,res) => {
 		})
 })
 
+//Delete all comments when post is being deleted
+app.delete(`/deleteAllComments/:id`,(req,res)=>{
+	Comment.destroy({
+		where : {
+			topicid : req.params.id
+		}
+	})
+		.then((comment) => {
+			res.sendStatus(200)
+		})
+		.catch((err) => {
+			console.log("err", err);
+		});
+})
 
 //Upload
 app.post('/upload',(req,res) => {
