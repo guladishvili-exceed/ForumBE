@@ -13,9 +13,6 @@ module.exports = {
       },
       description : {
         type: Sequelize.STRING
-      },
-      comment : {
-        type: Sequelize.ARRAY(Sequelize.TEXT),
       }
     })
   },
