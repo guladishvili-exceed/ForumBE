@@ -17,6 +17,10 @@ const Comment = db.define("comments", {
 
 	comment: {
 		type: Sequelize.STRING,
+	},
+
+	username : {
+		type : Sequelize.STRING
 	}
 
 })

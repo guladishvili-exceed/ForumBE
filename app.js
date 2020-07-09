@@ -210,7 +210,8 @@ app.put('/updateTopic/:id', (req, res) => {
 app.post('/addComment/:id', (req, res) => {
 	Comment.create({
 		comment : req.body.comment,
-		topicid: req.params.id
+		topicid: req.params.id,
+		username : req.body.username
 	})
 		.then((result) => {
 			res.status(200).send(result)
@@ -220,12 +221,46 @@ app.post('/addComment/:id', (req, res) => {
 		})
 })
 
+//Delete comment
+
+app.delete('/deleteComment/:id',(req,res)=>{
+	Comment.destroy({
+		where : {
+			commentid : req.params.id
+		}
+	})
+		.then((comment) => {
+			res.sendStatus(200)
+		})
+		.catch((err) => {
+			console.log("err", err);
+		});
+})
+
+//Edit comment
+
+app.put('/editComment/:id',(req,res)=>{
+	Comment.update({
+		comment : req.body.comment
+	},
+		{where : {
+			commentid : req.params.id
+			}})
+		.then((result) => {
+			res.status(200).send(result)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
+})
+
+//Get comments
 app.get('/getComment/:id',(req,res) => {
 	Comment.findAll({
 		where : {
 			topicid:req.params.id
 		},
-		attributes : ['comment']
+		attributes : ['comment','commentid','username']
 	})
 		.then(posts => {
 			res.send(posts)
