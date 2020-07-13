@@ -7,12 +7,16 @@ const Users = db.define('Users',{
 		id: {
 			type: Sequelize.INTEGER,
 			primaryKey: true,
-			autoIncrement: true
+			autoIncrement: true,
+			unique : true
 		},
 		type : Sequelize.STRING,
 	} ,
 	password : {
 		type : Sequelize.STRING,
+	},
+	avatar : {
+		type : Sequelize.STRING
 	}
 })
 

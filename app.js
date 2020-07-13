@@ -11,6 +11,7 @@ const verify = require('./verifyToken')
 const app = express()
 const multer = require('multer')
 const path = require('path')
+const fileUrl = require('file-url');
 
 
 
@@ -162,7 +163,8 @@ app.get('/getTopic/:id', (req, res) => {
 	Posts.findOne({
 		where: {
 			id: req.params.id
-		}
+		},
+		attributes : ['description','title','username','id']
 	})
 		.then((post) => {
 			res.status(200).send(post);
@@ -286,7 +288,7 @@ app.delete(`/deleteAllComments/:id`,(req,res)=>{
 })
 
 //Upload
-app.post('/upload',(req,res) => {
+app.post('/upload/:id',(req,res) => {
 	upload(req, res, (err) => {
 		if (err) {
 			console.log('--------err', err);
@@ -296,6 +298,13 @@ app.post('/upload',(req,res) => {
 					msg:"Error:No file selected"
 				})
 			} else {
+				console.log('--------req.file', req.file);
+				Users.update({
+					avatar : req.body.avatar
+				},
+					{where : {
+						id  : req.params.id
+						}})
 				res.json({
 					msg : "File uploaded",
 					file : `uploads/${req.file.filename}`
@@ -304,6 +313,36 @@ app.post('/upload',(req,res) => {
 		}
 	})
 })
+
+// Get Current User Profile 
+app.get('/getUser/:id',(req,res)=>{
+		Users.findOne({
+			where : {
+				id : req.params.id
+			} ,
+			attributes : ['avatar','username']
+		})
+			.then((user) => {
+				res.send(user)
+			})
+			.catch((err) => {
+				console.log('--------err', err);
+			})
+})
+
+//Get All Users 
+app.get('/getUsers/',(req,res) => {
+
+	Users.findAll({})
+		.then((users) => {
+			res.send(users)
+		}) 
+		.catch((err) => {
+			console.log('--------err', err);
+		})
+	
+})
+
 
 app.listen(4000, () => {
 	console.log('Server is up')
