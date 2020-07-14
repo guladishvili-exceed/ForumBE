@@ -298,9 +298,8 @@ app.post('/upload/:id',(req,res) => {
 					msg:"Error:No file selected"
 				})
 			} else {
-				console.log('--------req.file', req.file);
 				Users.update({
-					avatar : req.body.avatar
+					avatar : fileUrl(req.file.path)
 				},
 					{where : {
 						id  : req.params.id
@@ -312,6 +311,10 @@ app.post('/upload/:id',(req,res) => {
 			}
 		}
 	})
+})
+
+app.post('/test',(req,res)=>{
+	res.send(req.file)
 })
 
 // Get Current User Profile 
