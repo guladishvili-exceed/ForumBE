@@ -14,45 +14,44 @@ const path = require('path')
 const fileUrl = require('file-url');
 
 
-
-
 app.engine('handlebars', exphbs({defaultLayout: "main"}))
 app.set('view engine', 'handlebars')
 app.use(bodyParser.json());
 app.use(cors())
 
+app.use('/uploads', express.static('uploads'))
 
 //Uploads
 
 const storage = multer.diskStorage({
-	destination : './uploads',
-	filename : (req, file, cb) => {
-		cb(null,file.fieldname + "-" + Date.now() + ".jpeg" +
-		path.extname(file.originalname));
+	destination: './uploads',
+	filename: (req, file, cb) => {
+		cb(null, file.fieldname + "-" + Date.now() + ".jpeg" +
+			path.extname(file.originalname));
 	}
 })
 
 // Init upload
 
 const upload = multer({
-	storage : storage,
-	fileFilter : (req,file,cb) => {
-		checkFileType(file,cb)
+	storage: storage,
+	fileFilter: (req, file, cb) => {
+		checkFileType(file, cb)
 	}
 }).single('avatar')
 
 // Check file type
 
-const checkFileType = (file,cb) => {
+const checkFileType = (file, cb) => {
 	// Allowed extensions
 	const fileTypes = /jpeg|jpg|png|gif/;
 	//Check extensions
-	const extname = fileTypes.test(	path.extname(file.originalname).toLowerCase())
+	const extname = fileTypes.test(path.extname(file.originalname).toLowerCase())
 	//Check mimeType
 	const mimetype = fileTypes.test(file.mimetype)
 
-	if(mimetype && extname) {
-		return cb(null,true);
+	if (mimetype && extname) {
+		return cb(null, true);
 	} else {
 		return cb("Error: Images Only")
 	}
@@ -99,7 +98,8 @@ app.post('/addUser', async (req, res) => {
 	// - - - - - - - - - - - - -
 	const addUser = Users.create({
 		username: req.body.username,
-		password: hashPassword
+		password: hashPassword,
+		role: "user"
 	})
 	try {
 		res.status(200).send(addUser)
@@ -128,6 +128,69 @@ app.post('/logIn/:username', async (req, res) => {
 	res.header("auth-token", token).send(token)
 
 })
+
+// Get Current User Profile
+app.get('/getUser/:id', (req, res) => {
+	Users.findOne({
+		where: {
+			id: req.params.id
+		},
+		attributes: ['avatar', 'username','role']
+	})
+		.then((user) => {
+			res.send(user)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
+})
+
+//Get All Users
+app.get('/getUsers/', (req, res) => {
+
+	Users.findAll({})
+		.then((users) => {
+			res.send(users)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
+
+})
+
+//Delete Single Users 
+app.delete('/deleteUser/:id', (req, res) => {
+	Users.destroy({
+		where: {
+			id: req.params.id
+		}
+	})
+		.then((user) => {
+			res.sendStatus(200)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
+})
+
+//Update User Role 
+app.put('/updateUserRole/:id', (req, res) => {
+	Users.update({
+			role: req.body.role
+		},
+		{
+			where: {
+				id: req.params.id
+			}
+		})
+		.then((user) => {
+			res.send(user)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
+})
+
 
 //Create Topic
 app.post('/addPost', async (req, res) => {
@@ -164,7 +227,7 @@ app.get('/getTopic/:id', (req, res) => {
 		where: {
 			id: req.params.id
 		},
-		attributes : ['description','title','username','id']
+		attributes: ['description', 'title', 'username', 'id']
 	})
 		.then((post) => {
 			res.status(200).send(post);
@@ -211,9 +274,9 @@ app.put('/updateTopic/:id', (req, res) => {
 // Add Comment
 app.post('/addComment/:id', (req, res) => {
 	Comment.create({
-		comment : req.body.comment,
+		comment: req.body.comment,
 		topicid: req.params.id,
-		username : req.body.username
+		username: req.body.username
 	})
 		.then((result) => {
 			res.status(200).send(result)
@@ -225,10 +288,10 @@ app.post('/addComment/:id', (req, res) => {
 
 //Delete comment
 
-app.delete('/deleteComment/:id',(req,res)=>{
+app.delete('/deleteComment/:id', (req, res) => {
 	Comment.destroy({
-		where : {
-			commentid : req.params.id
+		where: {
+			commentid: req.params.id
 		}
 	})
 		.then((comment) => {
@@ -241,13 +304,15 @@ app.delete('/deleteComment/:id',(req,res)=>{
 
 //Edit comment
 
-app.put('/editComment/:id',(req,res)=>{
+app.put('/editComment/:id', (req, res) => {
 	Comment.update({
-		comment : req.body.comment
-	},
-		{where : {
-			commentid : req.params.id
-			}})
+			comment: req.body.comment
+		},
+		{
+			where: {
+				commentid: req.params.id
+			}
+		})
 		.then((result) => {
 			res.status(200).send(result)
 		})
@@ -257,12 +322,12 @@ app.put('/editComment/:id',(req,res)=>{
 })
 
 //Get comments
-app.get('/getComment/:id',(req,res) => {
+app.get('/getComment/:id', (req, res) => {
 	Comment.findAll({
-		where : {
-			topicid:req.params.id
+		where: {
+			topicid: req.params.id
 		},
-		attributes : ['comment','commentid','username']
+		attributes: ['comment', 'commentid', 'username']
 	})
 		.then(posts => {
 			res.send(posts)
@@ -273,10 +338,10 @@ app.get('/getComment/:id',(req,res) => {
 })
 
 //Delete all comments when post is being deleted
-app.delete(`/deleteAllComments/:id`,(req,res)=>{
+app.delete(`/deleteAllComments/:id`, (req, res) => {
 	Comment.destroy({
-		where : {
-			topicid : req.params.id
+		where: {
+			topicid: req.params.id
 		}
 	})
 		.then((comment) => {
@@ -288,62 +353,36 @@ app.delete(`/deleteAllComments/:id`,(req,res)=>{
 })
 
 //Upload
-app.post('/upload/:id',(req,res) => {
+app.post('/upload/:id', (req, res) => {
 	upload(req, res, (err) => {
 		if (err) {
 			console.log('--------err', err);
 		} else {
 			if (req.file === undefined) {
 				res.json({
-					msg:"Error:No file selected"
+					msg: "Error:No file selected"
 				})
 			} else {
 				Users.update({
-					avatar : fileUrl(req.file.path)
-				},
-					{where : {
-						id  : req.params.id
-						}})
+						avatar: req.file.filename
+					},
+					{
+						where: {
+							id: req.params.id
+						}
+					})
 				res.json({
-					msg : "File uploaded",
-					file : `uploads/${req.file.filename}`
+					msg: "File uploaded",
+					file: `uploads/${req.file.filename}`
 				})
 			}
 		}
 	})
 })
 
-app.post('/test',(req,res)=>{
-	res.send(req.file)
-})
 
-// Get Current User Profile 
-app.get('/getUser/:id',(req,res)=>{
-		Users.findOne({
-			where : {
-				id : req.params.id
-			} ,
-			attributes : ['avatar','username']
-		})
-			.then((user) => {
-				res.send(user)
-			})
-			.catch((err) => {
-				console.log('--------err', err);
-			})
-})
-
-//Get All Users 
-app.get('/getUsers/',(req,res) => {
-
-	Users.findAll({})
-		.then((users) => {
-			res.send(users)
-		}) 
-		.catch((err) => {
-			console.log('--------err', err);
-		})
-	
+app.get('/getPicture/:path', (req, res) => {
+	// ....
 })
 
 
