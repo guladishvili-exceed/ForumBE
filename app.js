@@ -135,7 +135,7 @@ app.get('/getUser/:id', (req, res) => {
 		where: {
 			id: req.params.id
 		},
-		attributes: ['avatar', 'username','role']
+		attributes: ['avatar', 'username', 'role','gender','age','name']
 	})
 		.then((user) => {
 			res.send(user)
@@ -378,6 +378,26 @@ app.post('/upload/:id', (req, res) => {
 			}
 		}
 	})
+})
+
+//Update user profile
+app.put('/updateProfile/:id', (req, res) => {
+	Users.update({
+			name: req.body.name,
+			age: req.body.age,
+			gender: req.body.gender,
+		},
+		{
+			where: {
+				id: req.params.id
+			}
+		})
+		.then((result)=>{
+			res.send(result)
+		})
+		.catch((err) => {
+			console.log('--------err', err);
+		})
 })
 
 

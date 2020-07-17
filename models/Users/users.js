@@ -20,6 +20,15 @@ const Users = db.define('Users',{
 	},
 	avatar : {
 		type : Sequelize.STRING
+	},
+	age : {
+		type : Sequelize.STRING
+	},
+	gender : {
+		type : Sequelize.STRING
+	},
+	name : {
+		type : Sequelize.STRING
 	}
 })
 
