@@ -257,6 +257,7 @@ app.delete('/deleteTopic/:id', (req, res) => {
 app.put('/updateTopic/:id', (req, res) => {
 	Posts.update({
 			description: req.body.description,
+			title : req.body.title
 		},
 		{
 			where: {

@@ -14,6 +14,24 @@ module.exports = {
      },
      password : {
        type: Sequelize.STRING
+     },
+     name : {
+       type : Sequelize.STRING
+     },
+     gender : {
+       type : Sequelize.STRING
+     },
+     age : {
+       type : Sequelize.STRING
+     } ,
+     role : {
+       type : Sequelize.STRING
+     },
+     createdAt : {
+       type : Sequelize.DATE
+     },
+     updatedAt : {
+       type : Sequelize.DATE
      }
    })
   },
